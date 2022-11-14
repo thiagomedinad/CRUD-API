@@ -1,3 +1,4 @@
+const { query, request } = require('express');
 const { Pool } = require('pg');
 
 const Poll = require('pg').Pool;
@@ -19,16 +20,44 @@ const getAllUsers = (req, res) => {
     })
 }
 
-const addUser = (req, res) => {
-    const { name, email } = req.body;
-
-    poll.query('INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *', [name, email], (error, results) => {
+const getUser = (req, res) => {
+    const id = parseInt(req.params.id);
+    
+    poll.query('SELECT * FROM users WHERE id = $1', [id], (error, results) => {
         if (error) {
             throw error;
         }
 
-        res.status(201).send(`User created with ID: ${results.rows[0].id}`);
-    })
+        res.status(200).json(results.rows);
+    });
+}
+
+const addUser = (req, res) => {
+    const { cpf, name, email } = req.body;
+
+    poll.query('SELECT name FROM users WHERE cpf = $1', [cpf], (error, results) => {
+        if (error) {
+            throw error;
+        }
+        
+        if (results.rows[0] != null) {
+            return res.status(400).send('CPF already registered!');
+        } else {
+            poll.query('INSERT INTO users (cpf, name, email) VALUES ($1, $2, $3) RETURNING *', [cpf, name, email], (error, results) => {
+                if (error) {
+                    throw error;
+                }
+            });
+
+            poll.query('INSERT INTO account (num) VALUES (1234) RETURNING *', (error, results) => {
+                if (error) {
+                    throw error;
+                }
+
+                res.status(201).send(`User succesfully created!`);
+            });
+        }
+    });
 }
 
 const updateUserName = (req, res) => {
@@ -48,19 +77,31 @@ const updateUserName = (req, res) => {
 
 const deleteUser = (req, res) => {
     const id = parseInt(req.params.id);
-    
-    poll.query('DELETE FROM users WHERE id = $1', [id], (error, results) => {
+
+    poll.query('SELECT * FROM users where id = $1', [id], (error, results) => {
         if (error) {
             throw error;
         }
 
-        res.status(200).send(`User with ID: ${id} sucessfully deleted!`);
-    })
+        if (results.rows[0] != null) {
+            poll.query('DELETE FROM users WHERE id = $1', [id], (error, results) => {
+                if (error) {
+                    throw error;
+                }
+        
+                res.status(200).send(`User with ID: ${id} sucessfully deleted!`);
+            });
+        } else {
+            return res.send('User dont exists!');
+        }
+    });
 }
+
 
 module.exports = {
     getAllUsers,
     addUser,
     updateUserName,
     deleteUser,
+    getUser,
 }
