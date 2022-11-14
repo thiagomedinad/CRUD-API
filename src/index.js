@@ -17,6 +17,7 @@ app.get('/', (req, res) => {
 
 // Routes
 app.get('/users', db.getAllUsers);
+app.get('/users/:id', db.getUser);
 app.post('/users', db.addUser);
 app.put('/users/:id', db.updateUserName);
 app.delete('/users/:id', db.deleteUser);
