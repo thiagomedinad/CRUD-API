@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
-const db = require('../queries');
+const db_login = require('../routes/user');
 
 PORT = 8080;
 app.use(bodyParser.json())
@@ -15,12 +15,12 @@ app.get('/', (req, res) => {
     res.json({message: 'API is working!'})
 });
 
-// Routes
-app.get('/users', db.getAllUsers);
-app.get('/users/:id', db.getUser);
-app.post('/users', db.addUser);
-app.put('/users/:id', db.updateUserName);
-app.delete('/users/:id', db.deleteUser);
+// UserLogin Routes
+app.get('/users', db_login.getAllUsers);
+app.get('/users/:id', db_login.getUser);
+app.post('/users', db_login.addUser);
+app.put('/users/:id', db_login.updateUserName);
+app.delete('/users/:id', db_login.deleteUser);
 
 
 app.listen(PORT, () => {
