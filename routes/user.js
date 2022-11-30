@@ -35,6 +35,8 @@ const getUser = (req, res) => {
 const addUser = (req, res) => {
     const { cpf, name, email } = req.body;
 
+    let accountNumber = Math.floor(Math.random() * 100001);
+
     poll.query('SELECT name FROM users WHERE cpf = $1', [cpf], (error, results) => {
         if (error) {
             throw error;
@@ -49,7 +51,7 @@ const addUser = (req, res) => {
                 }
             });
 
-            poll.query('INSERT INTO account (num) VALUES (1234) RETURNING *', (error, results) => {
+            poll.query('INSERT INTO account (num) VALUES ($1) RETURNING *', [accountNumber], (error, results) => {
                 if (error) {
                     throw error;
                 }
